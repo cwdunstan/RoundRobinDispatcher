@@ -68,11 +68,14 @@ int main (int argc, char *argv[])
     }
 
 //  4. While there is a currently running process or either queue is not empty
-    while (current_process || fcfs_queue)
+    while (current_process || fcfs_queue || robin_queue)
     {
 //      i. Unload any arrived pending processes from the Job Dispatch queue dequeue process from Job Dispatch queue and enqueue on Round Robin queue;
-
-//TODO
+        while (fcfs_queue && fcfs_queue->arrival_time <= timer) 
+        {
+            enqPcb(robin_queue,deqPcb(&fcfs_queue));
+            printf("q");
+        }
 
 //      ii. If a process is currently running
         if (current_process)
