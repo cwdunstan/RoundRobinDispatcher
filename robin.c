@@ -21,7 +21,8 @@ int main (int argc, char *argv[])
     PcbPtr process = NULL;
     int timer = 0;
     int procs = 0;
-    int time_quantum =0;
+    int time_quantum = 0;
+    int quantum = 0;
 //  1. Populate the FCFS queue
 
     if (argc <= 0)
@@ -70,18 +71,19 @@ int main (int argc, char *argv[])
 //  4. While there is a currently running process or either queue is not empty
     while (current_process || fcfs_queue || robin_queue)
     {
-//      i. Unload any arrived pending processes from the Job Dispatch queue dequeue process from Job Dispatch queue and enqueue on Round Robin queue;
+//      i. Unload any arrived pending processes from the Job Dispatch queue dequeue process 
+//         from Job Dispatch queue and enqueue on Round Robin queue;
         while (fcfs_queue && fcfs_queue->arrival_time <= timer) 
         {
-            enqPcb(robin_queue,deqPcb(&fcfs_queue));
-            printf("q");
+            process = deqPcb(&fcfs_queue);
+            robin_queue = enqPcb(robin_queue, process);
         }
 
 //      ii. If a process is currently running
         if (current_process)
         {
 //          a. Decrease process remaining_cpu_time by quantum;
-            current_process->remaining_cpu_time -= time_quantum;
+            current_process->remaining_cpu_time = current_process->remaining_cpu_time-time_quantum;
 //          b. If times up
             if (current_process->remaining_cpu_time <= 0) 
             {
@@ -97,7 +99,7 @@ int main (int argc, char *argv[])
 //              A. Send SIGTSTP to suspend currently running process;
                 suspendPcb(current_process);
 //              B. Enqueue it back to the tail of Round Robin queue;
-                enqPcb(robin_queue, current_process);
+                robin_queue = enqPcb(robin_queue, current_process);
                 current_process = NULL;                
             }
         }
@@ -109,23 +111,32 @@ int main (int argc, char *argv[])
 //          b.  If the process job is a suspended process
             if (getPcbStatus(current_process) == 4)
             {
+                printPcb(current_process);
 //              A. send SIGCONT to resume
-                resumePcb(current_process);                
+                resumePcb(current_process);
+                printPcb(current_process);
             }
 //          c. else start it (fork & exec)
             else
             {
                 startPcb(current_process);
+
             }
 //          d. Set the process as the currently running process;
 
         }
-//      iv. Sleep for quantum (may/may not be the same as time_quantum, and may need to be calculated based on different situations);
-        sleep(time_quantum);
+//      iv. Sleep for quantum may/may not be the same as time_quantum, and may need to be calculated based on different situations);
+        if (current_process) {
+            if (current_process->remaining_cpu_time < time_quantum) {
+                sleep(MIN(current_process->remaining_cpu_time, time_quantum));
+            }
+            else {
+                sleep(time_quantum);
+            }
+        }
         
 //      v. Increment timer by quantum;
         timer+=time_quantum;
-        
 //      vi. Go back to 4.        
     }
 

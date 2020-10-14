@@ -2,7 +2,7 @@
 
 #ifndef FCFS_MAIN
 #define FCFS_MAIN
-
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 /* Include files */
 #include <stdio.h>
 #include <stdlib.h>

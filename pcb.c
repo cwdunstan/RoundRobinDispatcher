@@ -146,7 +146,7 @@ PcbPtr suspendPcb(PcbPtr p)
     }
     else
     {
-        kill(p->pid, SIGINT);
+        kill(p->pid, SIGSTOP);
         waitpid(p->pid, &status, WUNTRACED);
         p->status = PCB_SUSPENDED;
         return p;
