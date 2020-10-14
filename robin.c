@@ -23,6 +23,7 @@ int main (int argc, char *argv[])
     int procs = 0;
     int time_quantum = 0;
     int quantum = 0;
+    float totalW, totalT;  
 //  1. Populate the FCFS queue
 
     if (argc <= 0)
@@ -87,6 +88,9 @@ int main (int argc, char *argv[])
 //          b. If times up
             if (current_process->remaining_cpu_time <= 0) 
             {
+                // update wait and TaT values
+                totalT += timer - current_process->arrival_time;
+                totalW += timer - (current_process->arrival_time + current_process->service_time);
 //              A. Terminate the process;
                 terminatePcb(current_process);
 //              B. Deallocate the PCB (process control block)'s memory
@@ -111,10 +115,8 @@ int main (int argc, char *argv[])
 //          b.  If the process job is a suspended process
             if (getPcbStatus(current_process) == 4)
             {
-                printPcb(current_process);
 //              A. send SIGCONT to resume
                 resumePcb(current_process);
-                printPcb(current_process);
             }
 //          c. else start it (fork & exec)
             else
@@ -128,18 +130,21 @@ int main (int argc, char *argv[])
 //      iv. Sleep for quantum may/may not be the same as time_quantum, and may need to be calculated based on different situations);
         if (current_process) {
             if (current_process->remaining_cpu_time < time_quantum) {
-                sleep(MIN(current_process->remaining_cpu_time, time_quantum));
+                quantum = current_process->remaining_cpu_time;
             }
             else {
-                sleep(time_quantum);
+                quantum = time_quantum;
             }
         }
-        
+        sleep(quantum);
 //      v. Increment timer by quantum;
-        timer+=time_quantum;
+        timer+=quantum;
 //      vi. Go back to 4.        
     }
 
 //  3. Terminate the FCFS dispatcher
+    fprintf(stderr,"\ntotal TaT: %f\n total Wait: %f\n", totalT, totalW);
+    fprintf(stderr,"\nAvg TaT: %f\n Avg Wait: %f\n", (totalT/procs), (totalW/procs));
+
     exit(EXIT_SUCCESS);
 }
