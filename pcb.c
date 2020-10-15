@@ -97,9 +97,12 @@ PcbPtr startPcb (PcbPtr p)
     }
     else  // already started, so continue
     {
+        p->status = PCB_RUNNING;   
+        printPcbHdr();
+        printPcb(p);   
         kill(p->pid, SIGCONT);
     }
-    p->status = PCB_RUNNING;
+    p->status = PCB_RUNNING;   
     return p;
 }
 
@@ -121,7 +124,7 @@ PcbPtr terminatePcb(PcbPtr p)
     }
     else
     {
-        kill(p->pid, SIGTSTP);
+        kill(p->pid, SIGINT);
         waitpid(p->pid, &status, WUNTRACED);
         p->status = PCB_SUSPENDED;
         return p;
@@ -146,34 +149,9 @@ PcbPtr suspendPcb(PcbPtr p)
     }
     else
     {
-        kill(p->pid, SIGSTOP);
+        kill(p->pid, SIGTSTP);
         waitpid(p->pid, &status, WUNTRACED);
         p->status = PCB_SUSPENDED;
-        return p;
-    }
-}
-
-/*******************************************************
- * PcbPtr resumePcb(PcbPtr process) - resume
- *    a suspended process
- * returns:
- *    PcbPtr of process
- *    NULL if resume failed
- ******************************************************/
-PcbPtr resumePcb(PcbPtr p)
-{
-    int status;
-
-    if (!p)
-    {
-        fprintf(stderr, "ERROR: Can not resume a NULL process\n");
-        return NULL;
-    }
-    else
-    {
-        kill(p->pid, SIGCONT);
-        waitpid(p->pid, &status, WCONTINUED);
-        p->status = PCB_RUNNING;
         return p;
     }
 }

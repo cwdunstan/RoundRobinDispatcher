@@ -74,7 +74,7 @@ int main (int argc, char *argv[])
     {
 //      i. Unload any arrived pending processes from the Job Dispatch queue dequeue process 
 //         from Job Dispatch queue and enqueue on Round Robin queue;
-        while (fcfs_queue && fcfs_queue->arrival_time <= timer) 
+        if (fcfs_queue && fcfs_queue->arrival_time <= timer) 
         {
             process = deqPcb(&fcfs_queue);
             robin_queue = enqPcb(robin_queue, process);
@@ -84,7 +84,7 @@ int main (int argc, char *argv[])
         if (current_process)
         {
 //          a. Decrease process remaining_cpu_time by quantum;
-            current_process->remaining_cpu_time = current_process->remaining_cpu_time-time_quantum;
+            current_process->remaining_cpu_time = current_process->remaining_cpu_time-quantum;
 //          b. If times up
             if (current_process->remaining_cpu_time <= 0) 
             {
@@ -111,21 +111,12 @@ int main (int argc, char *argv[])
         if (!current_process && robin_queue)
         {
 //          a. Dequeue a process from the head of Round Robin queue;
-            current_process = deqPcb(&robin_queue);
 //          b.  If the process job is a suspended process
-            if (getPcbStatus(current_process) == 4)
-            {
-//              A. send SIGCONT to resume
-                resumePcb(current_process);
-            }
 //          c. else start it (fork & exec)
-            else
-            {
-                startPcb(current_process);
-
-            }
 //          d. Set the process as the currently running process;
 
+            current_process = deqPcb(&robin_queue);
+            startPcb(current_process);
         }
 //      iv. Sleep for quantum may/may not be the same as time_quantum, and may need to be calculated based on different situations);
         if (current_process) {
