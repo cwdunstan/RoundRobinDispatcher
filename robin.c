@@ -68,13 +68,14 @@ int main (int argc, char *argv[])
         fprintf(stderr, "Sorry, the time quantum must be at least one.\n");
         goto CHECKPOINT;
     }
+    quantum = time_quantum;
 
 //  4. While there is a currently running process or either queue is not empty
     while (current_process || fcfs_queue || robin_queue)
     {
 //      i. Unload any arrived pending processes from the Job Dispatch queue dequeue process 
 //         from Job Dispatch queue and enqueue on Round Robin queue;
-        if (fcfs_queue && fcfs_queue->arrival_time <= timer) 
+        while (fcfs_queue && fcfs_queue->arrival_time <= timer) 
         {
             process = deqPcb(&fcfs_queue);
             robin_queue = enqPcb(robin_queue, process);
@@ -111,8 +112,9 @@ int main (int argc, char *argv[])
         if (!current_process && robin_queue)
         {
 //          a. Dequeue a process from the head of Round Robin queue;
-//          b.  If the process job is a suspended process
-//          c. else start it (fork & exec)
+//              b. If the process job is a suspended process
+//              c. else start it (fork & exec)
+//                 *(Both Handled in pcb.c startPcb() function)
 //          d. Set the process as the currently running process;
 
             current_process = deqPcb(&robin_queue);
@@ -134,8 +136,7 @@ int main (int argc, char *argv[])
     }
 
 //  3. Terminate the FCFS dispatcher
-    fprintf(stderr,"\ntotal TaT: %f\n total Wait: %f\n", totalT, totalW);
-    fprintf(stderr,"\nAvg TaT: %f\n Avg Wait: %f\n", (totalT/procs), (totalW/procs));
+    fprintf(stderr,"\nAvg TaT: %.2f\n Avg Wait: %.2f\n", (totalT/procs), (totalW/procs));
 
     exit(EXIT_SUCCESS);
 }

@@ -195,25 +195,6 @@ PcbPtr printPcb(PcbPtr p)
 }
 
 /*******************************************************
- * int getPcbStatus() - returns process status
- *  returns:
- *    status of process or -1
- ******************************************************/
-int getPcbStatus(PcbPtr p)
-{
-    int status;
-    if (!p)
-    {
-        fprintf(stderr, "ERROR: Can not get status of a NULL process\n");
-        return -1;
-    }
-    else
-    {
-        return p->status;
-    }
-}
-
-/*******************************************************
  * void printPcbHdr() - print header for printPcb
  *  returns:
  *    void
